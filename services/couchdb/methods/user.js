@@ -11,7 +11,6 @@ module.exports = function(options,service) {
       var loginCouch = new CouchLogin(options.registryCouch, NaN);
       loginCouch.login(loginDetails, function (er, cr, couchSession) {
         console.log("anoncouch logged in as " + loginDetails.name)
-        console.log("token is " + couchSession.token)
         if (er) {
           log.error(uuid.v1() + ' ' + Hapi.error.internal('Unable to log in user ' + loginDetails.name), er);
 
@@ -33,7 +32,7 @@ module.exports = function(options,service) {
           service.methods.metrics.addCouchLatencyMetric(timer, 'login');
 
           // attach the token to the user data so we can save it in the session
-          data.token = couchSession.token
+          data.token = loginCouch.token
 
           return next(err, data);
         });
