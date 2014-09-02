@@ -8,7 +8,11 @@ $(function () {
   require("./update-package-issue-count")()
 })
 
+<<<<<<< HEAD
 },{"./highlight":2,"./npm-expansions":3,"./update-package-issue-count":4,"jquery":15}],2:[function(require,module,exports){
+=======
+},{"./highlight":2,"./star":3,"./update-package-issue-count":4,"jquery":15}],2:[function(require,module,exports){
+>>>>>>> remove localStarrage code; add some silly animation until someone says it’s dumb
 var Highlight = require("highlight.js/lib/highlight");
 var hl = module.exports = new Highlight();
 
@@ -25,6 +29,7 @@ hl.registerLanguage("xml", require('highlight.js/lib/languages/xml'));
 hl.initHighlightingOnLoad();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 },{"highlight.js/lib/highlight":5,"highlight.js/lib/languages/bash":6,"highlight.js/lib/languages/coffeescript":7,"highlight.js/lib/languages/css":8,"highlight.js/lib/languages/glsl":9,"highlight.js/lib/languages/http":10,"highlight.js/lib/languages/javascript":11,"highlight.js/lib/languages/json":12,"highlight.js/lib/languages/typescript":13,"highlight.js/lib/languages/xml":14}],3:[function(require,module,exports){
 window.expansions = require("npm-expansions")
 var $ = require("jquery")
@@ -38,13 +43,14 @@ var updateExpansion = function(event) {
   }
 =======
 },{"highlight.js/lib/highlight":6,"highlight.js/lib/languages/bash":7,"highlight.js/lib/languages/coffeescript":8,"highlight.js/lib/languages/css":9,"highlight.js/lib/languages/glsl":10,"highlight.js/lib/languages/http":11,"highlight.js/lib/languages/javascript":12,"highlight.js/lib/languages/json":13,"highlight.js/lib/languages/typescript":14,"highlight.js/lib/languages/xml":15}],3:[function(require,module,exports){
+=======
+},{"highlight.js/lib/highlight":5,"highlight.js/lib/languages/bash":6,"highlight.js/lib/languages/coffeescript":7,"highlight.js/lib/languages/css":8,"highlight.js/lib/languages/glsl":9,"highlight.js/lib/languages/http":10,"highlight.js/lib/languages/javascript":11,"highlight.js/lib/languages/json":12,"highlight.js/lib/languages/typescript":13,"highlight.js/lib/languages/xml":14}],3:[function(require,module,exports){
+>>>>>>> remove localStarrage code; add some silly animation until someone says it’s dumb
 // This is the module for starring and unstarring modules in the browser.
 // It uses a localStorage cache to maintain a list of recent starrings
 // and unstarrings, while the remote registry cache catches up.
 
 var $ = require("jquery");
-var uniq = require("array-uniq");
-var remove = require("remove-value");
 
 var star = module.exports = function() {
   $(star.init);
@@ -54,11 +60,6 @@ var star = module.exports = function() {
 star.init = function() {
   star.form = $('form.star')
   if (!star.form) return
-
-  // Check the local star cache and update the form input *before* attaching the change handler
-  var name = star.form.find("input[name=name]").val()
-  // star.form.find('input[type=checkbox]').prop("checked", star.packageInCache(name));
-
   star.form.find('input[type=checkbox]').on('change', star.onChange)
 }
 
@@ -73,9 +74,6 @@ star.onChange = function() {
 
   // JavaScript is loosely typed...
   data.isStarred = Boolean(data.isStarred)
-
-  // Cache it in locaStorage
-  // star.updateLocalCache(data);
 
   // Update count in label
   var count = Number(star.form.find("label").text())
@@ -102,29 +100,6 @@ $(function(){
     .error(star.onError)
 }
 
-// Add or remove this package from localStorage list of starred packages
-// star.updateLocalCache = function(data) {
-//   var stars = star.getCachedStarList()
-
-//   if (data.isStarred) {
-//     stars.push(data.name)
-//     stars = uniq(stars)
-//   } else {
-//     stars = remove(stars, data.name)
-//   }
-
-//   localStorage["stars"] = stars.join(";")
-// }
-
-// star.getCachedStarList = function() {
-//   var stars = localStorage["stars"] || "";
-//   return stars.length ? stars.split(";") : []
-// }
-
-// star.packageInCache = function(name) {
-//   return star.getCachedStarList().indexOf(name) > -1
-// }
-
 star.onDone = function (resp) {
   // console.log(resp)
 }
@@ -133,8 +108,12 @@ star.onError = function (xhr, status, error) {
   console.error(xhr, status, error)
 }
 
+<<<<<<< HEAD
 },{"array-uniq":5,"jquery":16,"remove-value":17}],4:[function(require,module,exports){
 >>>>>>> the stars are aligned
+=======
+},{"jquery":15}],4:[function(require,module,exports){
+>>>>>>> remove localStarrage code; add some silly animation until someone says it’s dumb
 module.exports = function(){
 
   window.issuesEl = $("#issues")
@@ -178,6 +157,7 @@ module.exports = function(){
 }
 
 },{}],5:[function(require,module,exports){
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 (function (global){
@@ -233,6 +213,8 @@ if ('Set' in global) {
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],6:[function(require,module,exports){
 >>>>>>> the stars are aligned
+=======
+>>>>>>> remove localStarrage code; add some silly animation until someone says it’s dumb
 var Highlight = function() {
 
   /* Utility functions */
@@ -10855,6 +10837,7 @@ return jQuery;
 }));
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 },{}],16:[function(require,module,exports){
 module.exports=[
   "Nacho Pizza Marinade",
@@ -10909,4 +10892,6 @@ module.exports = function( array, value, count ){
 	return array;
 };
 >>>>>>> the stars are aligned
+=======
+>>>>>>> remove localStarrage code; add some silly animation until someone says it’s dumb
 },{}]},{},[1]);

@@ -605,6 +605,26 @@ input[type=file] {
 .login-forms label {
   text-transform: lowercase;
 }
+.star input[type=checkbox] {
+  display: none;
+}
+.star input[type=checkbox] + label {
+  font-size: 20px;
+  line-height: 24px;
+  vertical-align: top;
+  color: rgba(0,0,0,0.6);
+  cursor: pointer;
+}
+.star input[type=checkbox] + label:before {
+  transition: transform 0.5s;
+  font-size: 24px;
+  color: rgba(0,0,0,0.1);
+  margin-right: 5px;
+}
+.star input[type=checkbox]:checked + label:before {
+  color: #f3b600;
+  transform: rotate(360deg);
+}
 nav {
   height: 38px;
   color: #fff;
