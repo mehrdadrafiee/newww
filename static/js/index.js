@@ -1,13 +1,14 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 window.$ = require("jquery");
 window.highlight = require("./highlight")
+window.npm_expansions = require("./npm-expansions")
 
 $(function () {
   console.log("DOM is ready");
   require("./update-package-issue-count")()
 })
 
-},{"./highlight":2,"./update-package-issue-count":3,"jquery":14}],2:[function(require,module,exports){
+},{"./highlight":2,"./npm-expansions":3,"./update-package-issue-count":4,"jquery":15}],2:[function(require,module,exports){
 var Highlight = require("highlight.js/lib/highlight");
 var hl = module.exports = new Highlight();
 
@@ -23,7 +24,31 @@ hl.registerLanguage("xml", require('highlight.js/lib/languages/xml'));
 
 hl.initHighlightingOnLoad();
 
-},{"highlight.js/lib/highlight":4,"highlight.js/lib/languages/bash":5,"highlight.js/lib/languages/coffeescript":6,"highlight.js/lib/languages/css":7,"highlight.js/lib/languages/glsl":8,"highlight.js/lib/languages/http":9,"highlight.js/lib/languages/javascript":10,"highlight.js/lib/languages/json":11,"highlight.js/lib/languages/typescript":12,"highlight.js/lib/languages/xml":13}],3:[function(require,module,exports){
+},{"highlight.js/lib/highlight":5,"highlight.js/lib/languages/bash":6,"highlight.js/lib/languages/coffeescript":7,"highlight.js/lib/languages/css":8,"highlight.js/lib/languages/glsl":9,"highlight.js/lib/languages/http":10,"highlight.js/lib/languages/javascript":11,"highlight.js/lib/languages/json":12,"highlight.js/lib/languages/typescript":13,"highlight.js/lib/languages/xml":14}],3:[function(require,module,exports){
+window.expansions = require("npm-expansions")
+var $ = require("jquery")
+var fadeDuration = 200
+var clickCount = -1
+
+var updateExpansion = function(event) {
+
+  if (++clickCount > 10) {
+    return window.location = "https://github.com/npm/npm-expansions"
+  }
+
+  var expansion = expansions[Math.floor(Math.random()*expansions.length)]
+  $("#npm-expansions").fadeOut(fadeDuration, function() {
+    $(this).text(expansion).fadeIn(fadeDuration)
+  })
+  return false
+}
+
+$(function(){
+  updateExpansion()
+  $("#npm-expansions").on('click', updateExpansion)
+})
+
+},{"jquery":15,"npm-expansions":16}],4:[function(require,module,exports){
 module.exports = function(){
 
   window.issuesEl = $("#issues")
@@ -66,7 +91,7 @@ module.exports = function(){
   }
 }
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 var Highlight = function() {
 
   /* Utility functions */
@@ -766,7 +791,7 @@ var Highlight = function() {
   };
 };
 module.exports = Highlight;
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 module.exports = function(hljs) {
   var VAR = {
     className: 'variable',
@@ -829,7 +854,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = function(hljs) {
   var KEYWORDS = {
     keyword:
@@ -963,7 +988,7 @@ module.exports = function(hljs) {
     ])
   };
 };
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = function(hljs) {
   var IDENT_RE = '[a-zA-Z-][a-zA-Z0-9_-]*';
   var FUNCTION = {
@@ -1067,7 +1092,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
     keywords: {
@@ -1161,7 +1186,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
     illegal: '\\S',
@@ -1195,7 +1220,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
     aliases: ['js'],
@@ -1267,7 +1292,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports = function(hljs) {
   var LITERALS = {literal: 'true false null'};
   var TYPES = [
@@ -1305,7 +1330,7 @@ module.exports = function(hljs) {
     illegal: '\\S'
   };
 };
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 module.exports = function(hljs) {
   return {
     aliases: ['ts'],
@@ -1392,7 +1417,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 module.exports = function(hljs) {
   var XML_IDENT_RE = '[A-Za-z0-9\\._:-]+';
   var PHP = {
@@ -1496,7 +1521,7 @@ module.exports = function(hljs) {
     ]
   };
 };
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
@@ -10687,5 +10712,39 @@ if ( typeof noGlobal === strundefined ) {
 return jQuery;
 
 }));
+
+},{}],16:[function(require,module,exports){
+module.exports=[
+  "Nacho Pizza Marinade",
+  "Nancy's Preferred Machete",
+  "Napping Panda Missionaries",
+  "Narwhals Poke Mammals",
+  "Neatly Positioned Magazines",
+  "Nerds Produce Money",
+  "Nerdy Pun Mavens",
+  "Never Panic Much",
+  "Never Poke Monkeys",
+  "Never Punch Manticores",
+  "New Powerful Machines",
+  "Newly Paranoid Maintainers",
+  "Nice People Matter",
+  "Nicer Perusal Method",
+  "Nifty Pun Master",
+  "No Potty Mouths",
+  "No Problem, Meatbag",
+  "No Problematic Moustaches",
+  "No Proscribed Meaning",
+  "Node Package Maid",
+  "Node Package Manager",
+  "Node Packaged Modules",
+  "Node Powered Missiles",
+  "Northern Pileated Marmoset",
+  "Norwegian Polka Music",
+  "Notable Pottery Manufacturer",
+  "Now Patented, Motherfuckers",
+  "Now Printing Money",
+  "Now Proudly Macho",
+  "nom, please more"
+]
 
 },{}]},{},[1]);
