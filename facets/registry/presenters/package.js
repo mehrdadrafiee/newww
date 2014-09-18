@@ -5,6 +5,7 @@ var marked = require('marked'),
     url = require('url'),
     ghurl = require('github-url-from-git'),
     gh = require('github-url-to-object'),
+    cheerio = require('cheerio'),
     log = require('bole')('registry-package-presenter');
 
 module.exports = function package (data, cb) {
@@ -83,6 +84,8 @@ module.exports = function package (data, cb) {
   if (data.bugs && data.bugs.url && gh(data.bugs.url)) {
     data.ghapi = gh(data.bugs.url).api_url
   }
+
+  removeRedundantHeadingFromReadme(data)
 
   return cb(null, data);
 }
@@ -301,4 +304,17 @@ function processDependencies (dependencies, max) {
     });
   }
   return deps;
+}
+
+// If the README's first H1 element contains text that
+// matches the package name, then remove the element.
+function removeRedundantHeadingFromReadme (data) {
+  if (typeof data.readme !== "string") return
+  var $ = cheerio.load(data.readme)
+  var h1 = $('h1').first()
+  var namePattern = new RegExp(data.name, "i")
+  if (h1 && h1.text() && h1.text().match(namePattern)) {
+    h1.remove()
+    data.readme = $.html()
+  }
 }
