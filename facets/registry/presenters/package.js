@@ -5,6 +5,7 @@ var marked = require('marked'),
     url = require('url'),
     ghurl = require('github-url-from-git'),
     gh = require('github-url-to-object'),
+    cheerio = require('cheerio'),
     log = require('bole')('registry-package-presenter');
 
 module.exports = function package (data, cb) {
@@ -87,6 +88,8 @@ module.exports = function package (data, cb) {
   if (data.users) {
     data.starCount = Object.keys(data.users).length
   }
+  
+  removeSuperfluousContentFromReadme(data)
 
   return cb(null, data);
 }
@@ -305,4 +308,40 @@ function processDependencies (dependencies, max) {
     });
   }
   return deps;
+}
+
+function removeSuperfluousContentFromReadme (data) {
+  if (typeof data.readme !== "string") return
+  var $ = cheerio.load(data.readme)
+
+  // Remove first H1 if it matches package name
+  var h1 = $('h1').first()
+  var namePattern = new RegExp(data.name, "i")
+  if (h1 && h1.text() && h1.text().match(namePattern)) {
+    h1.remove()
+    data.readme = $.html()
+  }
+
+  // Remove nodei.co badges
+  var nodeicoBadges = $("a[href*='//nodei.co']")
+  if (nodeicoBadges) {
+    nodeicoBadges.remove()
+    data.readme = $.html()
+  }
+
+  // Remove shields.io badges, but save them in the context
+  // for potentional display elsewhere on the page
+  var shields = $("a:has(img[src*='img.shields.io'])")
+  if (shields) {
+    data.badges = []
+    shields.each(function(i, el) {
+      data.badges.push({
+        href: $(el).attr('href'),
+        img: $(el).find('img').attr('src')
+      })
+    })
+    shields.remove()
+    data.readme = $.html()
+  }
+
 }

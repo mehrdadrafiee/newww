@@ -465,7 +465,7 @@ textarea {
 input[type=text],
 input[type=password] {
   display: block;
-  width: 96%;
+  width: 100%;
   height: 38px;
   padding-left: 2%;
   padding-right: 2%;
@@ -573,7 +573,7 @@ input[type=file] {
   background: url("../img/select-bg.png") no-repeat 95% 50%;
 }
 .login-forms {
-  width: 300px;
+  max-width: 420px;
   margin: 0 auto 50px;
   text-align: left;
 }
@@ -643,6 +643,18 @@ nav {
     background: rgba(0,0,0,0.04);
     z-index: 12;
   }
+}
+nav h2 a {
+  margin: 0;
+  text-decoration: none;
+  border: none;
+  opacity: 1;
+  color: rgba(255,255,255,0.6);
+  padding-right: 100px;
+}
+nav h2 a:hover {
+  text-decoration: none;
+  border: none;
 }
 nav a {
   display: inline-block;
@@ -1489,10 +1501,11 @@ header #site-search-submit:hover {
 footer {
   position: relative;
   clear: both;
+  margin: 100px 0 0 0;
   padding: 38px 0 0;
   min-height: 150px;
   color: #fff;
-  font: 600 14px/21px 'Source Sans Pro', 'Lucida Grande', sans-serif;
+  font-size: 14px;
   background: rgba(0,0,0,0.8);
 }
 footer .container {
@@ -1534,6 +1547,7 @@ footer a#npm-loves-you {
 }
 footer #footer-logo {
   float: right;
+  opacity: 0.3;
 }
 footer #wombat {
   position: absolute;
