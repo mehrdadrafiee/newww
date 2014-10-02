@@ -1,6 +1,5 @@
 var Joi = require('joi'),
     Hapi = require('hapi'),
-    log = require('bole')('company-whoshiring-payments'),
     uuid = require('node-uuid'),
     metrics = require('newww-metrics')();
 
@@ -16,7 +15,8 @@ module.exports = function (options) {
     var opts = {
       user: request.auth.credentials,
       hiring: request.server.methods.hiring.getRandomWhosHiring(),
-      title: "Join the Who's Hiring Page"
+      title: "Join the Who's Hiring Page",
+      namespace: 'company-whoshiring-payments'
     }
 
     if (request.method === 'get') {
@@ -43,15 +43,17 @@ module.exports = function (options) {
 
     Joi.validate(request.payload, schema, function (err, token) {
       if (err) {
-        var errId = uuid.v1();
-        log.error(errId + ' ' + Hapi.error.badRequest('there was a validation error'), err);
-        return reply('validation error: ' + errId).code(403);
+        request.server.methods.error.generateError(opts, 'there was a validation error', 400, err, function (er) {
+
+          return reply('validation error: ' + er.errId).code(er.code);
+        });
       }
 
       if (VALID_CHARGE_AMOUNTS.indexOf(token.amount) === -1) {
-        var errId = uuid.v1();
-        log.error(errId + ' ' + Hapi.error.badRequest('the charge amount of ' + token.amount + ' is invalid'), err);
-        return reply('invalid charge amount error: ' + errId).code(403);
+        request.server.methods.error.generateError(opts, 'the charge amount of ' + token.amount + ' is invalid', 400, err, function (er) {
+
+          return reply('invalid charge amount error: ' + er.errId).code(er.code);
+        });
       }
 
       var stripeStart = Date.now();
@@ -62,9 +64,10 @@ module.exports = function (options) {
         description: "Charge for " + token.email
       }, function(err, charge) {
         if (err) {
-          var errId = uuid.v1();
-          log.error(errId + ' ' + Hapi.error.internal('something went wrong with the stripe charge'), err);
-          return reply('internal stripe error - ' + errId).code(500);
+          request.server.methods.error.generateError(opts, 'something went wrong with the stripe charge', 500, err, function (er) {
+
+            return reply('internal stripe error - ' + er.errId).code(er.code);
+          });
         }
 
         timer.end = Date.now();

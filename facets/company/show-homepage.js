@@ -1,9 +1,6 @@
 var TWO_WEEKS = 1000 * 60 * 60 * 24 * 14; // in milliseconds
 
 var commaIt = require('number-grouper'),
-    Hapi = require('hapi'),
-    log = require('bole')('company-homepage'),
-    uuid = require('node-uuid'),
     metrics = require('newww-metrics')(),
     parseLanguageHeader = require('accept-language-parser').parse,
     fmt = require("util").format;
@@ -68,7 +65,7 @@ function load (request, cb) {
     return function (err, data) {
 
       if (err) {
-        log.warn(uuid.v1() + ' ' + Hapi.error.internal('download error for ' + which), err);
+        request.server.methods.error.generateWarning('company-homepage', 'download error for ' + which, err);
       }
 
       cached[which] = data;
