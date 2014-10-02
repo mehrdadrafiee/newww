@@ -1,7 +1,4 @@
 var sanitizer = require('sanitizer'),
-    Hapi = require('hapi'),
-    log = require('bole')('registry-browse'),
-    uuid = require('node-uuid'),
     metrics = require('newww-metrics')();
 
 var pageSize = 100;
@@ -10,10 +7,12 @@ var possibleTypes = ['all', 'keyword', 'author', 'updated', 'depended', 'star', 
 module.exports = function (request, reply) {
   var opts = {
     user: request.auth.credentials,
-    hiring: request.server.methods.hiring.getRandomWhosHiring()
+    hiring: request.server.methods.hiring.getRandomWhosHiring(),
+    namespace: 'registry-browse'
   };
 
   var getBrowseData = request.server.methods.registry.getBrowseData,
+      generateError = request.server.methods.error.generateError,
       addMetric = metrics.addMetric,
       addLatencyMetric = metrics.addPageLatencyMetric,
       timer = { start: Date.now() };
@@ -30,12 +29,12 @@ module.exports = function (request, reply) {
   type = params.shift() || 'updated'; // grab the first one - that will be the type
 
   if (possibleTypes.indexOf(type) === -1) {
-    opts.errId = uuid.v1();
-
     opts.errorType = 'browseUrl';
 
-    log.error(opts.errId + ' ' + Hapi.error.notFound('The requested url is invalid'), opts.url);
-    return reply.view('registry/error', opts).code(404);
+    return generateError(opts, 'The requested url is invalid', 404, function (err) {
+
+      return reply.view('errors/notfound', err).code(err.code);
+    });
   }
 
   if (type !== 'all' && type !== 'updated') {
@@ -63,12 +62,12 @@ module.exports = function (request, reply) {
     timer.end = Date.now();
 
     if (err) {
-      opts.errId = uuid.v1();
-
       opts.errorType = 'internal';
 
-      log.error(opts.errId + ' ' + Hapi.error.internal('There was an error when getting the browse data'), err);
-      return reply.view('registry/error', opts).code(500);
+      return generateError(opts, 'There was an error when getting the browse data', 500, err, function (er) {
+
+        return reply.view('errors/generic', er).code(er.code);
+      });
     }
 
     var key = [type, arg, start, limit].join(', ');

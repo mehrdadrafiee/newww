@@ -1,7 +1,4 @@
 var elasticsearch = require('elasticsearch'),
-    Hapi = require('hapi'),
-    log = require('bole')('registry-search'),
-    uuid = require('node-uuid'),
     metrics = require('newww-metrics')();
 
 module.exports = function (options) {
@@ -93,15 +90,16 @@ module.exports = function (options) {
 
       var opts = {
         user: request.auth.credentials,
-        hiring: request.server.methods.hiring.getRandomWhosHiring()
+        hiring: request.server.methods.hiring.getRandomWhosHiring(),
+        namespace: 'registry-search'
       };
 
       if (error) {
-        opts.errId = uuid.v1();
         opts.errorType = 'internal';
-        log.error(opts.errId + ' ' + Hapi.error.internal('elasticsearch failed searching ' + request.query.q), error);
+        return request.server.methods.error.generateError(opts, 'elasticsearch failed searching ' + request.query.q, 500, error, function (err) {
 
-        return reply.view('registry/error', opts).code(500);
+          return reply.view('errors/generic', err).code(err.code);
+        });
       }
 
       timer.end = Date.now();

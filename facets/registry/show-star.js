@@ -1,20 +1,19 @@
-var Hapi = require('hapi'),
-    log = require('bole')('registry-star'),
-    uuid = require('node-uuid'),
-    util = require('util'),
+var util = require('util'),
     metrics = require('newww-metrics')();
 
 module.exports = function (request, reply) {
   var getPackage = request.server.methods.registry.getPackage,
       star = request.server.methods.registry.star,
       unstar = request.server.methods.registry.unstar,
+      generateError = request.server.methods.error.generateError,
       addMetric = metrics.addMetric,
       addLatencyMetric = metrics.addPageLatencyMetric,
       timer = { start: Date.now() };
 
   var opts = {
     user: request.auth.credentials,
-    hiring: request.server.methods.hiring.getRandomWhosHiring()
+    hiring: request.server.methods.hiring.getRandomWhosHiring(),
+    namespace: 'registry-star'
   };
 
   if (request.method === 'get') {
@@ -22,8 +21,9 @@ module.exports = function (request, reply) {
   }
 
   if (typeof opts.user === 'undefined') {
-    log.error(uuid.v1() + 'user isn\'t logged in');
-    return reply('user isn\'t logged in').code(403);
+    return generateError(opts, 'user isn\'t logged in', 403, function (err) {
+      return reply('user isn\'t logged in').code(err.code);
+    });
   }
 
   var username = opts.user.name,
@@ -35,17 +35,19 @@ module.exports = function (request, reply) {
 
     star(pkg, username, function (err, data) {
 
-      if (err) {
-        var errId = uuid.v1();
-        log.error(errId + ' ' + Hapi.error.internal(util.format("%s was unable to star %s", username, pkg)), err);
-        return reply('not ok - ' + errId).code(500);
+      if (er) {
+        return generateError(opts, util.format("%s was unable to star %s", username, pkg), 500, er, function (err) {
+
+          return reply('not ok - ' + err.errId).code(err.code);
+        });
       }
 
       getPackage.cache.drop(pkg, function (er, resp) {
         if (er) {
-          var errId = uuid.v1();
-          log.error(errId + ' ' + Hapi.error.internal(util.format("unable to drop cache for %s", pkg)), err);
-          return reply('not ok - ' + errId).code(500);
+          return generateError(opts, util.format("unable to drop cache for %s", pkg), 500, er, function (err) {
+
+            return reply('not ok - ' + err.errId).code(err.code);
+          });
         }
 
         timer.end = Date.now();
@@ -59,17 +61,19 @@ module.exports = function (request, reply) {
 
     unstar(pkg, username, function (err, data) {
 
-      if (err) {
-        var errId = uuid.v1();
-        log.error(errId + ' ' + Hapi.error.internal(util.format("%s was unable to unstar %s", username, pkg)), err);
-        return reply('not ok - ' + errId).code(500);
+      if (er) {
+        return generateError(opts, util.format("%s was unable to unstar %s", username, pkg), 500, er, function (err) {
+
+          return reply('not ok - ' + err.errId).code(err.code);
+        });
       }
 
       getPackage.cache.drop(pkg, function (er, resp) {
         if (er) {
-          var errId = uuid.v1();
-          log.error(errId + ' ' + Hapi.error.internal(util.format("unable to drop cache for %s", pkg)), err);
-          return reply('not ok - ' + errId).code(500);
+          return generateError(opts, util.format("unable to drop cache for %s", pkg), 500, er, function (err) {
+
+            return reply('not ok - ' + err.errId).code(err.code);
+          });
         }
 
         timer.end = Date.now();
