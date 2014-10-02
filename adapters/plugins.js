@@ -17,6 +17,7 @@ module.exports = [
   },
   require('../services/registry'),
   require('../services/whoshiring'),
+  require('../services/error'),
   {
     plugin: require('../services/downloads'),
     options: config.downloads
