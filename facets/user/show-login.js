@@ -1,13 +1,11 @@
 var murmurhash = require('murmurhash'),
-    Hapi = require('hapi'),
-    uuid = require('node-uuid'),
-    log = require('bole')('user-login'),
     url = require('url'),
     metrics = require('newww-metrics')();
 
 module.exports = function login (request, reply) {
   var loginUser = request.server.methods.user.loginUser,
       setSession = request.server.methods.user.setSession(request),
+      generateError = request.server.methods.error.generateError,
       addMetric = metrics.addMetric,
       addLatencyMetric = metrics.addPageLatencyMetric,
       timer = { start: Date.now() };
@@ -20,46 +18,32 @@ module.exports = function login (request, reply) {
   }
 
   var opts = {
-    hiring: request.server.methods.hiring.getRandomWhosHiring()
+    hiring: request.server.methods.hiring.getRandomWhosHiring(),
+    namespace: 'user-login'
   };
 
   if (request.method === 'post') {
 
     if (!request.payload.name || !request.payload.password) {
-      opts.error = {
-        type: 'missing'
-      };
+      opts.errorType = 'missing';
     } else {
-      // console.log("Post received, about to login")
+
       loginUser(request.payload, function (er, user) {
         if (er || !user) {
-          var errId = uuid.v1();
-          log.error(errId + ' ' + Hapi.error.badRequest('Invalid username or password'), request.payload.name);
-          opts.error = {
-            type: 'invalid',
-            errId: errId
-          };
+          opts.errorType = 'invalid';
 
-          timer.end = Date.now();
-          addLatencyMetric(timer, 'login-error');
+          return generateError(opts, 'Invalid username or password', 400, request.payload.name, function (err) {
 
-          addMetric({name: 'login-error'})
-          return reply.view('user/login', opts).code(400);
+            return reply.view('user/login', opts).code(400);
+          });
         }
-        // console.log("Login received, user available, setting session")
-        // console.log("User is",user)
 
-        setSession(user, function (err) {
-          // console.log("session set, next...")
-          if (err) {
-            var errId = uuid.v1();
-            log.error(errId + ' ' + err)
+        setSession(user, function (er) {
+          if (er) {
+            return generateError(opts, 'Session could not be set for ' + user.name, 500, er, function (err) {
 
-            timer.end = Date.now();
-            addLatencyMetric(timer, 'login-error');
-
-            addMetric({name: 'login-error'})
-            return reply.view('user/error', {errId: errId}).code(500);
+              return reply.view('errors/generic', err).code(err.code);
+            });
           }
 
           if (user && user.mustChangePass) {
@@ -82,7 +66,6 @@ module.exports = function login (request, reply) {
           addLatencyMetric(timer, 'login-complete');
 
           addMetric({name: 'login-complete'})
-          // console.log("Sending logged-in user to " + donePath)
           return reply.redirect(donePath);
         });
       });
@@ -94,6 +77,6 @@ module.exports = function login (request, reply) {
     addLatencyMetric(timer, 'login');
 
     addMetric({name: 'login'})
-    return reply.view('user/login', opts).code(opts.error ? 400 : 200)
+    return reply.view('user/login', opts).code(opts.errorType ? 400 : 200)
   }
 }

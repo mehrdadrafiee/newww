@@ -1,8 +1,5 @@
-var Hapi = require('hapi'),
-    crypto = require('crypto'),
+var crypto = require('crypto'),
     userValidate = require('npm-user-validate'),
-    log = require('bole')('user-password'),
-    uuid = require('node-uuid'),
     metrics = require('newww-metrics')();
 
 module.exports = function (request, reply) {
@@ -65,7 +62,7 @@ module.exports = function (request, reply) {
       return reply.view('user/password', opts).code(400);
     }
 
-    log.warn('Changing password', { name: prof.name });
+    request.server.methods.error.generateWarning('user-password', 'Changing password', { name: prof.name });
 
     var newAuth = { name: prof.name, password: data.new };
     newAuth.mustChangePass = false;
@@ -111,16 +108,14 @@ function sha (s) {
 }
 
 function showError (request, reply, message, logExtras) {
-  var errId = uuid.v1();
-
   var opts = {
     user: request.auth.credentials,
-    errId: errId,
-    code: 500,
-    hiring: request.server.methods.hiring.getRandomWhosHiring()
+    hiring: request.server.methods.hiring.getRandomWhosHiring(),
+    namespace: 'user-password'
   };
 
-  log.error(errId + ' ' + Hapi.error.internal(message), logExtras);
+  request.server.methods.error.generateError(opts, message, 500, logExtras, function (err) {
 
-  return reply.view('user/error', opts).code(500);
+    return reply.view('errors/generic', err).code(err.code);
+  });
 }

@@ -21,8 +21,14 @@ module.exports = function generateError (opts, message, code, logExtras, cb) {
     default: error = Hapi.error.internal(message); break;
   }
 
-
-  metrics.addMetric({name: 'error', type: opts.errorType, message: message, value: 1, code: opts.code});
+  metrics.addMetric({
+    name: 'error',
+    type: opts.errorType,
+    message: message,
+    value: 1,
+    code: opts.code,
+    namespace: opts.namespace
+  });
 
   log(opts.namespace).error(opts.errId + ' ' + error, logExtras);
 

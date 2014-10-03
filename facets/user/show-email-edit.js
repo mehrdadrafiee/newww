@@ -1,9 +1,6 @@
-var Hapi = require('hapi'),
-    userValidate = require('npm-user-validate'),
+var userValidate = require('npm-user-validate'),
     nodemailer = require('nodemailer'),
     crypto = require('crypto'),
-    log = require('bole')('user-email-edit'),
-    uuid = require('node-uuid'),
     metrics = require('newww-metrics')();
 
 var transport, mailer;
@@ -246,12 +243,9 @@ function confirm (request, reply) {
         opts.user.email = email2;
         opts.confirmed = true;
 
-        setSession(opts.user, function (err) {
-          if (err) {
-            opts.errId = uuid.v1();
-            log.error(opts.errId + ' ' + Hapi.error.internal('Unable to set the session for user ' + opts.user.name), err);
-
-            return reply.view('user/error', opts);
+        setSession(opts.user, function (er) {
+          if (er) {
+            return showError(request, reply, 'Unable to set the session for user ' + opts.user.name, 500, er);
           }
 
           timer.end = Date.now();
@@ -322,12 +316,9 @@ function revert (request, reply) {
 
           opts.user.email = email1;
 
-          setSession(opts.user, function (err) {
-            if (err) {
-              opts.errId = uuid.v1();
-              log.error(opts.errId + ' ' + Hapi.error.internal('Unable to set the session for user ' + opts.user.name), err);
-
-              return reply.view('user/error', opts);
+          setSession(opts.user, function (er) {
+            if (er) {
+              return showError(request, reply, 'Unable to set the session for user ' + opts.user.name, 500, er);
             }
 
             timer.end = Date.now();
@@ -352,23 +343,15 @@ function pbkdf2 (pass, salt, iterations) {
 }
 
 function showError (request, reply, message, code, logExtras) {
-  var errId = uuid.v1();
 
   var opts = {
     user: request.auth.credentials,
-    errId: errId,
-    code: code || 500,
-    hiring: request.server.methods.hiring.getRandomWhosHiring()
+    hiring: request.server.methods.hiring.getRandomWhosHiring(),
+    namespace: 'user-email-edit'
   };
 
-  var error;
-  switch (code) {
-    case 403: error = Hapi.error.forbidden(message); break;
-    case 404: error = Hapi.error.notFound(message); break;
-    default: error = Hapi.error.internal(message); break;
-  }
+  return request.server.methods.error.generateError(opts, message, code, logExtras, function (err) {
 
-  log.error(errId + ' ' + error, logExtras);
-
-  return reply.view('user/error', opts).code(code || 500);
+      return reply.view('errors/generic', err).code(err.code);
+  });
 }

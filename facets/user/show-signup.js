@@ -1,9 +1,6 @@
 var Joi = require('joi'),
     userValidate = require('npm-user-validate'),
     murmurhash = require('murmurhash'),
-    Hapi = require('hapi'),
-    log = require('bole')('user-signup'),
-    uuid = require('node-uuid'),
     metrics = require('newww-metrics')();
 
 module.exports = function signup (request, reply) {
@@ -101,23 +98,14 @@ module.exports = function signup (request, reply) {
 };
 
 function showError (request, reply, message, code, logExtras) {
-  var errId = uuid.v1();
-
   var opts = {
     user: request.auth.credentials,
-    errId: errId,
-    code: code || 500,
-    hiring: request.server.methods.hiring.getRandomWhosHiring()
+    hiring: request.server.methods.hiring.getRandomWhosHiring(),
+    namespace: 'user-signup'
   };
 
-  var error;
-  if (code === 403) {
-    error = Hapi.error.forbidden(message);
-  } else {
-    error = Hapi.error.internal(message);
-  }
+  request.server.methods.error.generateError(opts, message, code, logExtras, function (err) {
 
-  log.error(errId + ' ' + error, logExtras);
-
-  return reply.view('user/error', opts).code(code || 500);
+    return reply.view('errors/generic', err).code(err.code);
+  });
 }

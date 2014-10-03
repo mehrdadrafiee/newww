@@ -1,9 +1,6 @@
-var Hapi = require('hapi'),
-    userValidate = require('npm-user-validate'),
+var userValidate = require('npm-user-validate'),
     nodemailer = require('nodemailer'),
     crypto = require('crypto'),
-    log = require('bole')('user-forgot'),
-    uuid = require('node-uuid'),
     metrics = require('newww-metrics')();
 
 var transport, mailer;
@@ -92,7 +89,7 @@ function token (request, reply) {
           mustChangePass: true
         };
 
-    log.warn('About to change password', { name: name });
+    request.server.methods.error.generateWarning('user-forgot', 'About to change password', { name: name });
 
     request.server.methods.user.changePass(newAuth, function (err, data) {
       if (err) {
@@ -304,23 +301,13 @@ function sha (token) {
 }
 
 function showError (request, reply, message, code, logExtras) {
-  var errId = uuid.v1();
-
   var opts = {
     user: request.auth.credentials,
-    errId: errId,
-    code: code || 500,
-    hiring: request.server.methods.hiring.getRandomWhosHiring()
+    hiring: request.server.methods.hiring.getRandomWhosHiring(),
+    namespace: 'user-forgot'
   };
 
-  var error;
-  switch (code) {
-    case 400: error = Hapi.error.badRequest(message); break;
-    case 404: error = Hapi.error.notFound(message); break;
-    default: error = Hapi.error.internal(message); break;
-  }
-
-  log.error(errId + ' ' + error, logExtras);
-
-  return reply.view('user/error', opts).code(code || 500);
+  request.server.methods.error.generateError(opts, message, code, logExtras, function (err) {
+    return reply.view('error/generic', err).code(err.code);
+  });
 }

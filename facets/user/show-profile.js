@@ -1,7 +1,4 @@
 var transform = require('./presenters/profile').transform,
-    Hapi = require('hapi'),
-    log = require('bole')('user-profile'),
-    uuid = require('node-uuid'),
     metrics = require('newww-metrics')();
 
 module.exports = function (options) {
@@ -14,7 +11,8 @@ module.exports = function (options) {
 
     var opts = {
       user: request.auth.credentials,
-      hiring: request.server.methods.hiring.getRandomWhosHiring()
+      hiring: request.server.methods.hiring.getRandomWhosHiring(),
+      namespace: 'user-profile'
     };
 
     var profileName = request.params.name || opts.user.name;
@@ -30,18 +28,18 @@ module.exports = function (options) {
 
     return getUser(profileName, showProfile);
 
-    function showProfile (err, showprofile) {
-      if (err) {
-        opts.errId = uuid.v1();
-        log.error(opts.errId + Hapi.error.notFound('Profile for ' + profileName + ' not found'), err);
+    function showProfile (er, showprofile) {
+      if (er) {
+        return request.server.methods.error.generateError(opts, 'Profile for ' + profileName + ' not found', 404, er, function (err) {
 
-        opts.name = profileName;
+          opts.name = profileName;
 
-        timer.end = Date.now();
-        addLatencyMetric(timer, 'profile-not-found');
+          timer.end = Date.now();
+          addLatencyMetric(timer, 'profile-not-found');
 
-        addMetric({ name: 'profile-not-found', value: opts.name });
-        return reply.view('user/profile-not-found', opts).code(404);
+          addMetric({ name: 'profile-not-found', value: opts.name });
+          return reply.view('user/profile-not-found', opts).code(404);
+        });
       }
 
       getBrowseData('userstar', profileName, 0, 1000, function (err, starred) {
@@ -95,16 +93,14 @@ function getRandomAssortment (items, browseKeyword, name) {
 }
 
 function showError (request, reply, message, logExtras) {
-  var errId = uuid.v1();
-
   var opts = {
     user: request.auth.credentials,
-    errId: errId,
-    code: 500,
-    hiring: request.server.methods.hiring.getRandomWhosHiring()
+    hiring: request.server.methods.hiring.getRandomWhosHiring(),
+    namespace: 'user-profile'
   };
 
-  log.error(errId + ' ' + Hapi.error.internal(message), logExtras);
+  return request.server.methods.error.generateError(opts, message, 500, logExtras, function (err) {
 
-  return reply.view('user/error', opts).code(500);
+    return reply.view('errors/generic', err).code(err.code);
+  });
 }

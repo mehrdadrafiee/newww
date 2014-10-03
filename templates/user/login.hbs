@@ -3,12 +3,12 @@
   <h2>{{t "user.login.subtitle"}}</h2>
 <hgroup>
 
-{{#if error}}
-  {{#compare error.type 'missing'}}
+{{#if errorType}}
+  {{#compare errorType 'missing'}}
     <p class='error'>{{t "user.login.error.missing"}}</p>
   {{else}}
     <p class='error'>{{t "user.login.error.invalid"}}</p>
-    <p>{{{t "user.login.error.invalidContext"}}}<code>{{error.errId}}</code></p>
+    <p>{{{t "user.login.error.invalidContext"}}}<code>{{errId}}</code></p>
   {{/compare}}
 {{/if}}
 
