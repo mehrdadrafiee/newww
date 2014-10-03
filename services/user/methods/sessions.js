@@ -4,6 +4,10 @@ var Hapi = require('hapi'),
     murmurhash = require('murmurhash'),
     metrics = require('newww-metrics')();
 
+var opts = {
+  namespace: 'user-sessions'
+};
+
 module.exports = {
   set: function set (request) {
     return function (user, next) {
@@ -12,13 +16,13 @@ module.exports = {
 
       user.sid = sid;
 
-      request.server.app.cache.set(sid, user, 0, function (err) {
-        if (err) {
-          var errId = uuid.v1();
-          log.error(errId + ' ' + Hapi.error.internal('there was an error setting the cache'));
+      request.server.app.cache.set(sid, user, 0, function (er) {
+        if (er) {
+          return request.server.methods.error.generateError(opts, 'there was an error setting the cache', 500, er, function (err) {
 
-          metrics.addMetric({name: 'setSessionError'});
-          return next(Hapi.error.internal(errId));
+            metrics.addMetric({name: 'setSessionError'});
+            return next(Hapi.error.internal(err.errId));
+          });
         }
 
         timer.end = Date.now();
@@ -37,6 +41,12 @@ module.exports = {
 
   del: function del (request) {
     return function (user, next) {
+      if (!user) {
+        return request.server.methods.error.generateError(opts, 'no user session to log out', 500, function (err) {
+          return next(Hapi.error.internal(err.errId));
+        })
+      }
+
       var sid = murmurhash.v3(user.name, 55).toString(16),
           timer = { start: Date.now() };
 
@@ -44,12 +54,13 @@ module.exports = {
 
       request.server.methods.user.logoutUser(user.token, function () {
 
-        request.server.app.cache.drop(sid, function (err) {
-          if (err) {
-            var errId = uuid.v1();
-            log.error(errId + ' ' + Hapi.error.internal('there was an error clearing the cache'));
-            metrics.addMetric({name: 'delSessionError'});
-            return next(Hapi.error.internal(errId));
+        request.server.app.cache.drop(sid, function (er) {
+          if (er) {
+            return request.server.methods.error.generateError(opts, 'there was an error clearing the cache', 500, er, function (err) {
+
+              metrics.addMetric({name: 'delSessionError'});
+              return next(Hapi.error.internal(err.errId));
+            });
           }
 
           timer.end = Date.now();
