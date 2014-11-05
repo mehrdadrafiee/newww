@@ -48,6 +48,30 @@ module.exports = function (request, reply) {
         pkg.lastPublished = moment(pkg.time[pkg.version]).fromNow()
         delete pkg.versions
 
+        // Add logos
+        logos = {
+          browserify: "https://d21ii91i3y6o6h.cloudfront.net/gallery_images/from_proof/1647/small/1405586570/browserify-2-hexagon-sticker.png",
+          dat: "https://d21ii91i3y6o6h.cloudfront.net/gallery_images/from_proof/1497/large/1403068242/dat-data.png",
+          bower: "https://i.cloudup.com/Ka0R3QvWRs.png",
+          gulp: "https://raw.githubusercontent.com/gulpjs/artwork/master/gulp-2x.png",
+          grunt: "https://i.cloudup.com/bDkmXyEmr5.png",
+          "grunt-cli": "https://i.cloudup.com/bDkmXyEmr5.png",
+          less: "https://i.cloudup.com/LYSQDzsBKK.png",
+          npm: "https://cldup.com/Rg6WLgqccB.svg",
+          cordova: "https://cldup.com/q5Jmvu10tV.png",
+          forever: "https://cldup.com/iSilAlBYLW.svg",
+          "coffee-script": "https://cldup.com/kyDqUBuW3k.png",
+          karma: "https://cldup.com/0286W-2y27.png",
+          yo: "https://cldup.com/P3MQgWdDyG.png",
+          "pm2": "https://cldup.com/PKpktytKH9.png"
+        }
+
+        for (name in logos) {
+          if (name === pkg.name) {
+            pkg.logo = logos[name]
+          }
+        }
+
         return pkg
       })
     };

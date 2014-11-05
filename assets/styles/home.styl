@@ -59,20 +59,44 @@ ul.columnar
     margin-bottom 20px
 
 
-packageWidgetHeadingHeight = 20px
+packageWidgetLogoSize = 42px
+
 .package-widget
+  position relative
+  // background yellow
+
   &:hover
     a
       color npmred !important
 
+  .package-logo
+    display block
+    position absolute
+    top 0px
+    left 0
+    width packageWidgetLogoSize
+    height packageWidgetLogoSize
+    // background #EEE
+    text-align center
+
+    img
+      display inline-block
+      max-width 100%
+      max-height 100%
+
+  .package-details
+    display block
+    padding-left packageWidgetLogoSize + 12px
+    max-width 90%
+
   h3, h3 a
-    font-size packageWidgetHeadingHeight
-    line-height packageWidgetHeadingHeight
+    font-size 20px
+    line-height 20px
     overflow visible
     vertical-align top
     margin 0
     padding 0
-    max-width 90%
+    max-width 100%
     @extend .ellipsis
 
   a
@@ -81,16 +105,11 @@ packageWidgetHeadingHeight = 20px
       transform all 0.1s
       color greigh2
       @extend .red-on-hover
-      &:before
-        color greigh5
-        line-height packageWidgetHeadingHeight
-        padding-right 6px
 
   p
     font-size 15px
     margin 0
-    max-width 90%
-    padding-left 22px
+    max-width 100%
     color greigh3
     @extend .ellipsis
 
@@ -101,4 +120,3 @@ packageWidgetHeadingHeight = 20px
       color greigh2
       @extend .red-on-hover
       font-weight 400
-      // text-decoration underline
