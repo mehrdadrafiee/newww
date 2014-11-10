@@ -37,6 +37,15 @@
 </div>
 
 <h2 class="centered">
+  <a id="staff-picks" href="#staff-picks">npm staff picks</a>
+</h2>
+<ul class="columnar">
+  {{#each staff-picks}}
+    <li>{{> package-widget}}</li>
+  {{/each}}
+</ul>
+
+<h2 class="centered">
   <a id="explicit" href="#explicit">packages people 'npm install' a lot</a>
 </h2>
 <ul class="columnar">
