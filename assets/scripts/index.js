@@ -7,6 +7,7 @@ window.obfuscate = require("./email-obfuscate")()
 window.payments = require("./payments")()
 window.github = require("./github")()
 window.pretty_numbers = require("./pretty-numbers")()
+require("./what-npm-is-for")()
 
 $(function () {
   $(".autoselect-wrapper input").on("click", function () {
